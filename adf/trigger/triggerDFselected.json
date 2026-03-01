@@ -1,0 +1,17 @@
+{
+	"name": "triggerDFselected",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 15,
+				"startTime": "2026-02-28T14:16:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}

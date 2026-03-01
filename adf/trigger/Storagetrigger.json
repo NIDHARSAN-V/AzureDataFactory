@@ -1,0 +1,24 @@
+{
+	"name": "Storagetrigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PROD",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/sourcecontainer/blobs/csvfiles/ccssvv.csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/4f739b8e-3e34-4c37-a7fe-7c4db9d09c9a/resourceGroups/azurefundamentalgroup/providers/Microsoft.Storage/storageAccounts/storageazurefund123",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

@@ -1,0 +1,136 @@
+{
+	"name": "DataFlowSeq",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Report_Src_DF",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AggregatedVisaData",
+						"type": "DatasetReference"
+					},
+					"name": "StoreInDashboardVisa"
+				},
+				{
+					"dataset": {
+						"referenceName": "MastercardAggData",
+						"type": "DatasetReference"
+					},
+					"name": "StoreInDashboardMasterCard"
+				},
+				{
+					"dataset": {
+						"referenceName": "AggAmData",
+						"type": "DatasetReference"
+					},
+					"name": "StoreInDashboardAm"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RemovedUnwantedCols"
+				},
+				{
+					"name": "CustomerIdFilter"
+				},
+				{
+					"name": "PaymentSplit"
+				},
+				{
+					"name": "ReplaceNull"
+				},
+				{
+					"name": "VisaTotalamt"
+				},
+				{
+					"name": "CustomerTotalSpent"
+				},
+				{
+					"name": "MastercardTotalamt"
+				},
+				{
+					"name": "CustomerTotalSales"
+				},
+				{
+					"name": "AmTotalamt"
+				},
+				{
+					"name": "CustomerTotalSalesAm"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          transaction_id as integer,",
+				"          transactional_date as string,",
+				"          product_id as string,",
+				"          customer_id as integer,",
+				"          payment as string,",
+				"          credit_card as string,",
+				"          loyalty_card as string,",
+				"          cost as double,",
+				"          quantity as integer,",
+				"          price as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 select(mapColumn(",
+				"          transaction_id,",
+				"          transactional_date,",
+				"          product_id,",
+				"          customer_id,",
+				"          payment,",
+				"          cost,",
+				"          quantity,",
+				"          price",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> RemovedUnwantedCols",
+				"RemovedUnwantedCols filter(customer_id < 12) ~> CustomerIdFilter",
+				"CustomerIdFilter split(payment == 'visa',",
+				"     payment =='mastercard',",
+				"     disjoint: false) ~> PaymentSplit@(Visa, MasterCard, Other)",
+				"PaymentSplit@Other derive(payment = coalesce(payment , 'N/A')) ~> ReplaceNull",
+				"PaymentSplit@Visa derive(totalamt = price * quantity) ~> VisaTotalamt",
+				"VisaTotalamt aggregate(groupBy(customer_id),",
+				"     totalamtSpent = sum(totalamt)) ~> CustomerTotalSpent",
+				"PaymentSplit@MasterCard derive(totalamt = quantity * price) ~> MastercardTotalamt",
+				"MastercardTotalamt aggregate(groupBy(customer_id),",
+				"     totalamt = sum(totalamt)) ~> CustomerTotalSales",
+				"ReplaceNull derive(totalamt = quantity * price) ~> AmTotalamt",
+				"AmTotalamt aggregate(groupBy(customer_id),",
+				"     totalamt = sum(totalamt)) ~> CustomerTotalSalesAm",
+				"CustomerTotalSpent sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StoreInDashboardVisa",
+				"CustomerTotalSales sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StoreInDashboardMasterCard",
+				"CustomerTotalSalesAm sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StoreInDashboardAm"
+			]
+		}
+	}
+}

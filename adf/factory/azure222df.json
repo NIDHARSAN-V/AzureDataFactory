@@ -1,0 +1,9 @@
+{
+	"name": "azure222df",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "91623b7f-6699-480c-acd8-de958793250d",
+		"tenantId": "377d3334-11a8-40cb-a6ac-28e7ef75bf5b"
+	}
+}

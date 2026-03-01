@@ -1,0 +1,49 @@
+{
+	"name": "PROD",
+	"properties": {
+		"activities": [
+			{
+				"name": "DataGet",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "StorageTriggPipeline",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Selected",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DataGet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "OnlySelectedFile",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-02-28T20:02:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
